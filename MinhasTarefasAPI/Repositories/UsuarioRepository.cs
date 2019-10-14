@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using MinhasTarefasAPI.Models;
+using MinhasTarefasAPI.Repositories.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace MinhasTarefasAPI.Repositories
 {
-    public class UsuarioRepository
+    public class UsuarioRepository : IUsuarioRepository
     {
         private readonly UserManager<ApplicationUser> _userManager;
 
@@ -17,7 +18,7 @@ namespace MinhasTarefasAPI.Repositories
             _userManager = userManager;
         }
 
-        ApplicationUser Obter(string email, string senha)
+        public ApplicationUser Obter(string email, string senha)
         {
             var usuario = _userManager.FindByEmailAsync(email).Result;
             if (_userManager.CheckPasswordAsync(usuario, senha).Result)
@@ -44,7 +45,5 @@ namespace MinhasTarefasAPI.Repositories
                 throw new Exception($"Usuário não cadastrado! {sb.ToString()}");
             }
         }
-
-        
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MinhasTarefasAPI.Repositories.Contracts
 {
-    interface ITarefaRepository
+    public interface ITarefaRepository
     {
         List<Tarefa> Sincronizacao(List<Tarefa> tarefas);
         List<Tarefa> Restauracao(ApplicationUser usuarioId, DateTime dataUltimSincronizacao);
