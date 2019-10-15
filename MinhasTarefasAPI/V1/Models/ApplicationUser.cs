@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace MinhasTarefasAPI.Models
+namespace MinhasTarefasAPI.V1.Models
 {
     public class ApplicationUser : IdentityUser
     {
@@ -13,5 +13,6 @@ namespace MinhasTarefasAPI.Models
 
         [ForeignKey("UsuarioId")]
         public virtual ICollection<Tarefa> Tarefas { get; set; }
+        public virtual ICollection<Token> Tokens { get; set; }
     }
 }

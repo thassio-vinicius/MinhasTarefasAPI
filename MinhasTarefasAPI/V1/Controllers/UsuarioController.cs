@@ -6,27 +6,33 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using MinhasTarefasAPI.Models;
-using MinhasTarefasAPI.Repositories.Contracts;
+using MinhasTarefasAPI.V1.Models;
+using MinhasTarefasAPI.Repositories.V1.Contracts;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 
-namespace MinhasTarefasAPI.Controllers
+namespace MinhasTarefasAPI.V1.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [ApiVersion("1.0")]
     public class UsuarioController : ControllerBase
     {
         private readonly IUsuarioRepository _iUsuarioRepository;
+        private readonly ITokenRepository _tokenRepository;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public UsuarioController(IUsuarioRepository iUsuarioRepository, SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager)
+        public UsuarioController(IUsuarioRepository iUsuarioRepository, 
+            SignInManager<ApplicationUser> signInManager, 
+            UserManager<ApplicationUser> userManager, 
+            ITokenRepository tokenRepository)
         {
             _iUsuarioRepository = iUsuarioRepository;
             _signInManager = signInManager;
             _userManager = userManager;
+            _tokenRepository = tokenRepository;
         }
 
         [HttpPost("login")]
@@ -41,7 +47,7 @@ namespace MinhasTarefasAPI.Controllers
                 {
                     //_signInManager.SignInAsync(usuario, false);
 
-                    return Ok(BuildToken(usuario));
+                    return TokenGenerator(usuario);
                 }
                 else
                 {
@@ -54,6 +60,28 @@ namespace MinhasTarefasAPI.Controllers
             }
         }
 
+        [HttpPost("renovar")]
+        public ActionResult Renovar([FromBody]TokenDTO tokenDTO)
+        {
+            var refreshTokenDB = _tokenRepository.Obter(tokenDTO.RefreshToken);
+
+            if (refreshTokenDB == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                refreshTokenDB.Atualizado = DateTime.Now;
+                refreshTokenDB.Utilizado = true;
+                _tokenRepository.Atualizar(refreshTokenDB);
+
+                var usuario = _iUsuarioRepository.Obter(refreshTokenDB.UsuarioID);
+
+                return TokenGenerator(usuario);
+            }
+
+        }
+        
         [HttpPost("")]
         public ActionResult Cadastrar([FromBody]UsuarioDTO usuarioDTO)
         {
@@ -87,7 +115,7 @@ namespace MinhasTarefasAPI.Controllers
 
         }
 
-        public object BuildToken(ApplicationUser usuario)
+        private TokenDTO BuildToken(ApplicationUser usuario)
         {
             var claims = new[]
             {
@@ -108,7 +136,33 @@ namespace MinhasTarefasAPI.Controllers
             );
 
             var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
-            return new { token = tokenString, expiration = exp };
+
+            var refreshToken = Guid.NewGuid().ToString();
+
+            var expRefreshToken = DateTime.UtcNow.AddHours(2);
+
+            var tokenDTO = new TokenDTO { Token = tokenString, Expiration = exp, ExpirationRefreshToken = expRefreshToken, RefreshToken = refreshToken };
+
+
+            return tokenDTO;
         }
+
+        private ActionResult TokenGenerator(ApplicationUser usuario)
+        {
+            var token = (BuildToken(usuario));
+            var tokenModel = new Token()
+            {
+                RefreshToken = token.RefreshToken,
+                ExpirationToken = token.Expiration,
+                ExpirationRefreshToken = token.ExpirationRefreshToken,
+                Usuario = usuario,
+                Criado = DateTime.Now,
+                Utilizado = false
+            };
+
+            _tokenRepository.Cadastrar(tokenModel);
+            return Ok(token);
+        }
+
     }
 }

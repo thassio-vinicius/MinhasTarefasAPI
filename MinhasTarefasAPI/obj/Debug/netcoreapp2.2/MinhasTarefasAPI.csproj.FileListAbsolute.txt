@@ -65,3 +65,4 @@ C:\APIS-CSHARP\MinhasTarefasAPI\MinhasTarefasAPI\obj\Debug\netcoreapp2.2\MinhasT
 C:\APIS-CSHARP\MinhasTarefasAPI\MinhasTarefasAPI\obj\Debug\netcoreapp2.2\MinhasTarefasAPI.RazorTargetAssemblyInfo.cache
 C:\APIS-CSHARP\MinhasTarefasAPI\MinhasTarefasAPI\obj\Debug\netcoreapp2.2\MinhasTarefasAPI.dll
 C:\APIS-CSHARP\MinhasTarefasAPI\MinhasTarefasAPI\obj\Debug\netcoreapp2.2\MinhasTarefasAPI.pdb
+C:\APIS-CSHARP\MinhasTarefasAPI\MinhasTarefasAPI\bin\Debug\netcoreapp2.2\MinhasTarefasAPI.xml
